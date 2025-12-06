@@ -102,6 +102,7 @@ class QueryService:
         """
         logger.info("Querying vector store for top %d relevant chunks", n_results)
         
+        # Request distances from ChromaDB for similarity scores
         results = self.vector_store.query(
             query_embeddings=[query_embedding],
             n_results=n_results
@@ -115,6 +116,7 @@ class QueryService:
         if results and results.get('documents'):
             documents = results['documents'][0]
             metadatas = results.get('metadatas', [[]])[0]
+            distances = results.get('distances', [[]])[0]  # Get distance metrics
             
             num_chunks = len(documents)
             logger.info("Retrieved %d relevant chunk(s)", num_chunks)
@@ -123,10 +125,16 @@ class QueryService:
                 meta = metadatas[i] if i < len(metadatas) else {}
                 source = meta.get('source', 'unknown')
                 
+                # Convert distance to similarity score
+                # ChromaDB uses L2 (Euclidean) distance: lower = more similar
+                # Convert to 0-1 scale where 1 = perfect match, 0 = no match
+                distance = distances[i] if i < len(distances) else float('inf')
+                similarity = 1.0 / (1.0 + distance) if distance != float('inf') else 0.0
+                
                 retrieved_chunks.append(RetrievalChunk(
                     text=doc_text,
                     source=source,
-                    similarity_score=0.0  # ChromaDB doesn't expose distances directly
+                    similarity_score=round(similarity, 4)  # Round to 4 decimal places
                 ))
                 
                 context_parts.append(f"Source: {source}\nContent: {doc_text}")
