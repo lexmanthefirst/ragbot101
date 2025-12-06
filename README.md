@@ -1,11 +1,12 @@
 # RAG Chatbot API
 
-AI-powered document search and RAG (Retrieval Augmented Generation) query service built with FastAPI, PostgreSQL, ChromaDB, and OpenRouter.
+AI-powered document search and RAG (Retrieval Augmented Generation) query service built with FastAPI, PostgreSQL, ChromaDB, and OpenRouter. Supports both local (free, offline) and cloud-based embeddings.
 
 ## Features
 
 - **Document Ingestion**: Upload and process PDF, DOCX, and TXT files
 - **Vector Search**: Semantic search using ChromaDB for efficient retrieval
+- **Flexible Embeddings**: Choose between local embeddings (free, offline) or OpenRouter API
 - **RAG Query**: Answer questions using retrieved context with OpenRouter LLMs
 - **ACID Compliant**: PostgreSQL with proper transaction management
 - **Correlation ID Tracking**: Request tracing for debugging and monitoring
@@ -16,6 +17,7 @@ AI-powered document search and RAG (Retrieval Augmented Generation) query servic
 - **Framework**: FastAPI
 - **Database**: PostgreSQL with asyncpg
 - **Vector Store**: ChromaDB
+- **Embeddings**: sentence-transformers (local) or OpenRouter (cloud)
 - **LLM Provider**: OpenRouter
 - **ORM**: SQLAlchemy 2.0 (async)
 - **Migrations**: Alembic
@@ -24,7 +26,7 @@ AI-powered document search and RAG (Retrieval Augmented Generation) query servic
 
 - Python 3.11+
 - PostgreSQL 14+
-- OpenRouter API Key
+- OpenRouter API Key (optional for local embeddings)
 
 ## Installation
 
@@ -42,7 +44,17 @@ pip install -r requirements.txt
 Edit `.env` file:
 ```env
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/rag_chatbot
-OPENROUTER_API_KEY=your_key_here
+SECRET_KEY=your-secret-key-here
+
+# Embedding Configuration
+# Option 1: Local embeddings (free, offline, no API key needed)
+USE_LOCAL_EMBEDDINGS=true
+
+# Option 2: OpenRouter embeddings (requires API key and credits)
+# USE_LOCAL_EMBEDDINGS=false
+# OPENROUTER_API_KEY=your_key_here
+# EMBEDDING_MODEL=text-embedding-ada-002
+
 DB_ECHO=False
 LOG_LEVEL=INFO
 ```
@@ -169,9 +181,24 @@ RAG-chatbot/
 ## Vector Store
 
 ChromaDB stores document chunks with:
-- **Embeddings**: Generated via OpenRouter
+- **Embeddings**: Generated via local model (sentence-transformers) or OpenRouter API
 - **Metadata**: `document_id`, `chunk_index`, `source`
 - **Documents**: Text chunks (300-1000 characters)
+
+### Embedding Options
+
+**Local Embeddings (Default)**
+- Model: `all-MiniLM-L6-v2`
+- Free and offline
+- ~90MB model download (one-time)
+- Fast inference on CPU
+- Set `USE_LOCAL_EMBEDDINGS=true`
+
+**OpenRouter Embeddings**
+- Model: Configurable (default: `text-embedding-ada-002`)
+- Requires API key and credits
+- Higher quality for production use
+- Set `USE_LOCAL_EMBEDDINGS=false`
 
 ## Configuration
 
