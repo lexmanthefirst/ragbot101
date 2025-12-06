@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     # LLM - OpenRouter
     OPENROUTER_API_KEY: str
     OPENROUTER_MODEL: str = "openai/gpt-3.5-turbo"
+    EMBEDDING_MODEL: str = "text-embedding-ada-002"
     
     # LLM Fallback Models (optional)
     FALLBACK_MODEL_1: Optional[str] = None

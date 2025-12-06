@@ -43,7 +43,7 @@ class LLMService:
             List of floats representing the embedding
         """
         response = await self.client.embeddings.create(
-            model="text-embedding-ada-002", 
+            model=settings.EMBEDDING_MODEL, 
             input=text
         )
         return response.data[0].embedding
