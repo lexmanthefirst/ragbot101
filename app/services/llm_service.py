@@ -67,8 +67,7 @@ class LLMService:
             loop = asyncio.get_event_loop()
             embedding = await loop.run_in_executor(
                 None,
-                self.local_model.encode,
-                text
+                lambda: self.local_model.encode(text, normalize_embeddings=True)  # Enforce normalization
             )
             return embedding.tolist()
         else:

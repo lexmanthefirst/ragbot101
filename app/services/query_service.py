@@ -85,7 +85,7 @@ class QueryService:
     async def _retrieve_chunks(
         self,
         query_embedding: List[float],
-        n_results: int = 3
+        n_results: int = 5
     ) -> Tuple[List[RetrievalChunk], List[str]]:
         """
         Retrieve similar document chunks from vector store.
@@ -116,7 +116,7 @@ class QueryService:
         if results and results.get('documents'):
             documents = results['documents'][0]
             metadatas = results.get('metadatas', [[]])[0]
-            distances = results.get('distances', [[]])[0]  # Get distance metrics
+            similarities = results.get('similarities', [[]])[0]  # Use pre-converted similarities
             
             num_chunks = len(documents)
             logger.info("Retrieved %d relevant chunk(s)", num_chunks)
@@ -124,20 +124,19 @@ class QueryService:
             for i, doc_text in enumerate(documents):
                 meta = metadatas[i] if i < len(metadatas) else {}
                 source = meta.get('source', 'unknown')
+                section = meta.get('section', 'unknown')
                 
-                # Convert distance to similarity score
-                # ChromaDB uses L2 (Euclidean) distance: lower = more similar
-                # Convert to 0-1 scale where 1 = perfect match, 0 = no match
-                distance = distances[i] if i < len(distances) else float('inf')
-                similarity = 1.0 / (1.0 + distance) if distance != float('inf') else 0.0
+                # Get similarity score directly (already converted by vector store)
+                similarity = similarities[i] if i < len(similarities) else 0.0
                 
                 retrieved_chunks.append(RetrievalChunk(
                     text=doc_text,
                     source=source,
-                    similarity_score=round(similarity, 4)  # Round to 4 decimal places
+                    similarity_score=round(similarity, 4)
                 ))
                 
-                context_parts.append(f"Source: {source}\nContent: {doc_text}")
+                # Include section in context
+                context_parts.append(f"[Section: {section}]\nSource: {source}\nContent: {doc_text}")
         
         return retrieved_chunks, context_parts
     
