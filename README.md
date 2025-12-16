@@ -1,4 +1,4 @@
-# RAG Chatbot API
+# AI-Powered Document Search & RAG Query Service 
 
 AI-powered document search and RAG (Retrieval Augmented Generation) query service built with FastAPI, PostgreSQL, ChromaDB, and OpenRouter. Supports both local (free, offline) and cloud-based embeddings.
 
